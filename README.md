@@ -1,6 +1,6 @@
 # Bioinformatics: When Entropy Degrades Systems, We Rebuild Its Foundation
 
-> **"When entropy degrades systems, we rebuild its foundation/infrasture with bioinformatics."**
+> **"When entropy degrades systems, we rebuild its foundation with bioinformatics."**
 
 ## Overview
 
@@ -14,11 +14,13 @@ This repository implements **sparse-exit**, a Hamiltonian-path engine over Bloom
 
 ## Core Philosophy
 
-- **Bioinformation**: All data aligned with biological models - from DNA to human-centric wireless waves
-- **Sparse Structure**: Local/non-local maxima & minima without dense computation
-- **Perspective Membrane**: Safe, permeable cognitive bubble shielding intuition while allowing curiosity
-- **Observer → Consumer Model**: Passive listening → active use with dual-panic error recovery
-- **95.4% Persistence**: Information survives degradation, panic, and entropy
+| Concept | Definition |
+|---------|------------|
+| **Bioinformation** | All data aligned with biological models - from DNA to human-centric wireless waves |
+| **Sparse Structure** | Local/non-local maxima & minima without dense computation |
+| **Perspective Membrane** | Safe, permeable cognitive bubble shielding intuition while allowing curiosity |
+| **Observer → Consumer Model** | Passive listening → active use with dual-panic error recovery |
+| **95.4% Persistence** | Information survives degradation, panic, and entropy |
 
 ## Real-World Applications
 
@@ -58,6 +60,48 @@ Used for:
 - k-mer contig assembly
 - Energy-wave routing
 
+## Installation & Usage
+
+```bash
+git clone https://github.com/obinexus/bioinformatics.git
+cd bioinformatics
+chmod +x sparse_exit.py
+```
+
+### Quick Smoke Test
+
+1. Create a toy partial graph (JSON):
+
+```bash
+echo '{"0":[1,2],"1":[0,3],"2":[0,3],"3":[1,2,4],"4":[3]}' > partial.json
+```
+
+2. Create a 128-byte Bloom filter that *accepts* every edge in that graph:
+
+```bash
+python3 -c "
+import hashlib, struct
+bf = bytearray(128)
+def setbit(b, idx): b[idx//8] |= 1<<(idx%8)
+def h(x,i): return int.from_bytes(hashlib.sha256(f'{x}:{i}'.encode()).digest()[:4],'little') % (128*8)
+edges = [(0,1),(0,2),(1,3),(2,3),(3,4)]
+for a,b in edges:
+    for i in range(3): setbit(bf, h((a,b),i))
+open('hints.bin','wb').write(bf)"
+```
+
+3. Run:
+
+```bash
+chmod +x sparse_exit.py
+./sparse_exit.py hints.bin partial.json
+```
+
+Typical output (one possible Hamiltonian path):
+```
+0 2 3 1 0
+```
+
 ## Dual-Panic Recovery
 
 1. Entropy hits → degradation
@@ -74,22 +118,6 @@ Used for:
 - Evolution of infrastructure  
 - 95.4% information persistence
 - Sparse execution under entropy
-
-## Installation & Usage
-
-```bash
-git clone https://github.com/obinexus/bioinformatics.git
-cd V_MVP/
-chmod +x sparse_exit.py
-```
-
-### Smoke Test
-```bash
-echo '{"0":[1,2],"1":[0,3],"2":[0,3],"3":[1,2,4],"4":[3]}' > partial.json
-python3 -c "import hashlib; bf=bytearray(128); ... " > hints.bin  # (see script)
-./sparse_exit.py hints.bin partial.json
-# → 0 1 3 4 (or cycle: 0 1 3 4 0)
-```
 
 ---
 
