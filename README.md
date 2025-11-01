@@ -1,6 +1,6 @@
 # Bioinformatics: When Entropy Degrades Systems, We Rebuild Its Foundation
 
-> **"When entropy degrades systems, we rebuild its foundation with bioinformatics."**
+> **"When entropy degrades systems, we rebuild its foundation/infrasture with bioinformatics."**
 
 ## Overview
 
