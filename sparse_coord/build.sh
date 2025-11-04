@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail  # Exit on ANY error — no silent failures
+set -euo pipefail
 
 echo "=== PLP-128 Build Audit (Neurodivergent-First) ==="
 echo "OS: $(uname -s)"
 echo "GCC: $(gcc --version | head -1)"
 
-# Create dirs
+# Build
 mkdir -p sparse_coord/lib sparse_coord/include
 
-# Copy header if missing
+# Ensure header
 if [ ! -f sparse_coord/include/plp128.h ]; then
     cat > sparse_coord/include/plp128.h << 'EOF'
 #ifndef PLP128_H
@@ -19,20 +19,35 @@ int plp_cart2pol(double x, double y, double out[2]);
 int plp_pol2cart(double r, double theta_deg, double out[2]);
 #endif
 EOF
-    echo "✓ Created plp128.h"
+    echo "Created plp128.h"
 fi
 
-# Build with VERBOSE + error check
-echo "Building plp128.so/dylib..."
-gcc -Wall -Wextra -O2 -fPIC -shared sparse_coord/src/plp128.c -lm -o sparse_coord/lib/plp128.$([ "$(uname)" = "Darwin" ] && echo "dylib" || echo "so") -v  # -v for verbose linking
+# Build .so
+echo "Building plp128.so..."
+gcc -Wall -Wextra -O2 -fPIC -shared sparse_coord/src/plp128.c -lm -o sparse_coord/lib/plp128.so
 
-# Test: Try to load the library
-echo "Testing library load..."
-if [ "$(uname)" = "Darwin" ]; then
-    DYLD_LIBRARY_PATH=sparse_coord/lib:$$DYLD_LIBRARY_PATH ld -dylib sparse_coord/lib/plp128.dylib -lplp128 || echo "⚠ macOS load test passed (no crash)"
+# REAL LOAD TEST
+echo "Running REAL load test..."
+cat > /tmp/test_plp.c << 'EOF'
+#include "plp128.h"
+#include <stdio.h>
+int main() {
+    double out[2];
+    plp_cart2pol(3,4,out);
+    printf("Test: r=%.1f θ=%.1f°\n", out[0], out[1]);
+    return 0;
+}
+EOF
+
+gcc /tmp/test_plp.c -Isparse_coord/include -Lsparse_coord/lib -lplp128 -lm -o /tmp/test_plp
+if /tmp/test_plp; then
+    echo "REAL LOAD TEST PASSED"
 else
-    LD_LIBRARY_PATH=sparse_coord/lib:$$LD_LIBRARY_PATH ld -lplp128 --verbose || echo "⚠ Linux load test passed (no crash)"
+    echo "REAL LOAD TEST FAILED"
+    exit 1
 fi
 
-echo "✓ Build COMPLETE. Library ready in sparse_coord/lib/"
-ls -la sparse_coord/lib/
+rm /tmp/test_plp.c /tmp/test_plp
+
+echo "Build COMPLETE. Library ready:"
+ls -lh sparse_coord/lib/plp128.so
